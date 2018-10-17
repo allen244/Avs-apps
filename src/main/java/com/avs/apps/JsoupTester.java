@@ -14,36 +14,32 @@ import java.util.regex.Pattern;
 public class JsoupTester {
 
 
-    // Host Pattern
     static final Pattern DOMAIN_PATTERN = Pattern.compile("^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z][a-z0-9-]{0,61}[a-z0-9]$", Pattern.CASE_INSENSITIVE);
     // Whitelist Tags
-    static final List<String> htmlTagsToProhibit = Arrays.asList("applet", "audio", "base", "embed", "font", "form", "frame", "frameset", "img", "inline", "object", "param", "video");
-    static final List<String> unwrapTags = Arrays.asList("article_body", "articlecontent", "runtime|include", "runtime|topic");
+    static final List<String> htmlTagsToProhibit = Arrays.asList("applet", "audio", "base", "embed", "form", "frame", "frameset", "img", "inline", "object", "param","video");
+    static final List<String> unwrapTags = Arrays.asList("article_body", "articlecontent", "cw", "desk", "en", "font", "qa", "mmatvey", "runtime|include", "runtime|link", "runtime|topic", "no", "no1", "nm", "nm1", "wprice");
     // Whitelist or Global Attributes
-    static final List<String> globalAttrs = Arrays.asList("accesskey", "class", "data-", "dir", "dropzone", "draggable", "hidden", "id", "itemid", "itemprop", "itemref", "itemscope", "itemtype", "lang", "spellcheck", "style", "tabindex", "title", "translate");
-    static final List<String> globalEventAttrs = Arrays.asList("onafterprint", "onbeforeprint", "onbeforeunload", "onerror", "onhashchange", "itemid", "itemprop", "itemref", "itemscope", "itemtype", "lang", "tabindex", "title", "translate");
+    static final String tagsToCheckGlobalAttrs = "style,b,div,em,h1,h2,h3,h4,h5,h6,hr,i,p,strong";
+    static final List<String> globalAttrs = Arrays.asList("accesskey", "class", "dir", "draggable", "id", "itemid", "itemprop", "itemref", "itemscope", "itemtype", "lang", "tabindex", "title", "translate");
     static final List<String> validAAttrs = Arrays.asList("border", "download", "href", "hreflang", "media", "name", "referrerpolicy", "rel", "role", "target", "tabindex", "type");
     static final List<String> validARelValue = Arrays.asList("alternate", "author", "bookmark", "help", "license", "next", "nofollow", "noreferrer", "prefetch", "prev", "search", "standout", "tag");
-    static final List<String> validHrTagAttrs = globalAttrs;
-    static final List<String> validPTagAttrs = globalAttrs;
 
-    public static boolean isValidURL(String url) {
 
-        URL u = null;
-
+    private static boolean isValidURL(String url) {
+        URL u;
         try {
             u = new URL(url);
         } catch (MalformedURLException e) {
             return false;
         }
-
         try {
             u.toURI();
         } catch (URISyntaxException e) {
             return false;
         }
 
-        return true;
+        String host = u.getHost();
+        return host != null && DOMAIN_PATTERN.matcher(host).matches();
     }
 
     private static void removeComments(Node node) {
@@ -58,7 +54,7 @@ public class JsoupTester {
         }
     }
 
-    public static String ampSanitize(String element) {
+    public static String ampSanitize(String element,boolean isHeaderCall) {
 
 
         Document doc = Jsoup.parseBodyFragment(element);
@@ -79,9 +75,11 @@ public class JsoupTester {
             }
         }
 
-        Elements styleElements = doc.body().getElementsByTag("style");
-        for (Element elem : styleElements) {
-            elem.remove();
+        if (!isHeaderCall) {
+            Elements styleElements = doc.body().getElementsByTag("style");
+            for (Element elem : styleElements) {
+                elem.remove();
+            }
         }
 
         // a tag
@@ -93,7 +91,6 @@ public class JsoupTester {
                     item.removeAttr(attr.getKey());
                 }
             }
-
             String relValue = "";
             boolean hasRel = false;
             if (item.hasAttr("rel")) {
@@ -148,16 +145,23 @@ public class JsoupTester {
                 item.removeAttr("target");
             }
         }
-        // hr tag
-        Elements hrTags = doc.select("hr");
-        for (Element item : hrTags) {
-            Attributes hrTagAttrs = item.attributes();
-            for (Attribute attr : hrTagAttrs) {
-                if (!validHrTagAttrs.contains(attr.getKey())) {
+
+        // tags: div,em,h1,h2,h3,h4,h5,h6,hr,p,strong,style
+        Elements allTags = doc.select(tagsToCheckGlobalAttrs);
+        for (Element item : allTags) {
+            if(isHeaderCall && item.toString().contains("style")) {
+                continue;
+            }
+            Attributes allTagAttrs = item.attributes();
+            for (Attribute attr : allTagAttrs) {
+                System.out.println(attr);
+                System.out.println(attr.getKey());
+                if (!globalAttrs.contains(attr.getKey())) {
                     item.removeAttr(attr.getKey());
                 }
             }
         }
+
         // input tag
         Elements inputTags = doc.select("input");
         for (Element item : inputTags) {
@@ -165,6 +169,8 @@ public class JsoupTester {
                 item.remove();
             }
         }
+
+
         // meta tag
         Elements metaTags = doc.select("meta");
         for (Element item : metaTags) {
@@ -175,16 +181,7 @@ public class JsoupTester {
 //                item.removeAttr("charset");
 //            }
         }
-        // p tag
-        Elements pTags = doc.select("p");
-        for (Element item : pTags) {
-            Attributes pTagAttrs = item.attributes();
-            for (Attribute attr : pTagAttrs) {
-                if (!validPTagAttrs.contains(attr.getKey())) {
-                    item.removeAttr(attr.getKey());
-                }
-            }
-        }
+
 
         return doc.toString();
     }
@@ -193,10 +190,10 @@ public class JsoupTester {
 
         System.out.println("were are here hoooooooooo");
 
-        final String html = "<meta charset=\"UTF-8\"/>";
+        final String html = "<style amp-custom>";
 
 
-        System.out.println( JsoupTester.ampSanitize(html));
+        System.out.println( JsoupTester.ampSanitize(html, false));
 
 //        Document doc = Jsoup.parseBodyFragment(html);
 //        doc.outputSettings().prettyPrint(false);
