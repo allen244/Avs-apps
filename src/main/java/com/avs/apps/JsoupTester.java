@@ -19,7 +19,7 @@ public class JsoupTester {
     static final List<String> htmlTagsToProhibit = Arrays.asList("applet", "audio", "base", "embed", "form", "frame", "frameset", "img", "inline", "object", "param","video");
     static final List<String> unwrapTags = Arrays.asList("article_body", "articlecontent", "cw", "desk", "en", "font", "qa", "mmatvey", "runtime|include", "runtime|link", "runtime|topic", "no", "no1", "nm", "nm1", "wprice");
     // Whitelist or Global Attributes
-    static final String tagsToCheckGlobalAttrs = "style,b,div,em,h1,h2,h3,h4,h5,h6,hr,i,p,strong";
+    static final String tagsToCheckGlobalAttrs = "style,b,div,em,h1,h2,h3,h4,h5,h6,hr,i,p,strong,data-block-on-consent";
     static final List<String> globalAttrs = Arrays.asList("accesskey", "class", "dir", "draggable", "id", "itemid", "itemprop", "itemref", "itemscope", "itemtype", "lang", "tabindex", "title", "translate");
     static final List<String> validAAttrs = Arrays.asList("border", "download", "href", "hreflang", "media", "name", "referrerpolicy", "rel", "role", "target", "tabindex", "type");
     static final List<String> validARelValue = Arrays.asList("alternate", "author", "bookmark", "help", "license", "next", "nofollow", "noreferrer", "prefetch", "prev", "search", "standout", "tag");
@@ -129,8 +129,16 @@ public class JsoupTester {
                     item.attr("target", "_blank");
                     if (hasRel) {
                         item.attr("rel", relValue.concat(" noopener"));
+                        relValue = item.attr("rel").toLowerCase().trim();
+                        item.attr("rel", relValue.concat(" noreferrer"));
+
                     } else {
                         item.attr("rel", "noopener");
+                        relValue = item.attr("rel").toLowerCase().trim();
+                        System.out.println("yoo" + relValue);
+                        item.attr("rel", relValue.concat(" noreferrer"));
+                        relValue = item.attr("rel").toLowerCase().trim();
+                        item.attr("rel", relValue.concat(" nofollow"));
                     }
                 } else {
                     item.unwrap();
@@ -156,6 +164,9 @@ public class JsoupTester {
             for (Attribute attr : allTagAttrs) {
                 System.out.println(attr);
                 System.out.println(attr.getKey());
+
+
+
                 if (!globalAttrs.contains(attr.getKey())) {
                     item.removeAttr(attr.getKey());
                 }
@@ -188,9 +199,9 @@ public class JsoupTester {
 
     public static void main(String[] args) {
 
-        System.out.println("were are here hoooooooooo");
+        System.out.println("were are here hoooooooooogg");
 
-        final String html = "<style amp-custom>";
+        final String html = "<a href=\"http://metronews.ca/news/halifax/981266/i-dont-think-hes-crazy-mystery-man-who-gave-out-free-money-in-halifax-reportedly-detained-in-p-e-i-hospital/\" rel=\"nofollow\" target=\"_blank\">Metro News</a>";
 
 
         System.out.println( JsoupTester.ampSanitize(html, false));
