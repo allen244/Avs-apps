@@ -199,7 +199,7 @@ public class JsoupTester {
 
     public static void main(String[] args) {
 
-        System.out.println("were are here gggggggggggg");
+        System.out.println("were are here fffffffffff");
 
         final String html = "<a href=\"http://metronews.ca/news/halifax/981266/i-dont-think-hes-crazy-mystery-man-who-gave-out-free-money-in-halifax-reportedly-detained-in-p-e-i-hospital/\" rel=\"nofollow\" target=\"_blank\">Metro News</a>";
 
