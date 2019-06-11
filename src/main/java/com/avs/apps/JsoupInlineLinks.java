@@ -55,7 +55,7 @@ public class JsoupInlineLinks {
 
 
         //test
-        String s = "https://www.nydailynews.com";
+        String s = "https://www.nydailynews.com/";
         System.out.println(s.replaceAll("https://", ""));
 
         String marketDomains = "www.latimes.com,www.chicagotribune.com,www.nydailynews.com,www.courant.com";
