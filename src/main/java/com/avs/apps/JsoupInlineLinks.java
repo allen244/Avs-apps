@@ -53,6 +53,8 @@ public class JsoupInlineLinks {
 
     public static void main(String[] args) {
 
+
+        //test
         String s = "https://www.nydailynews.com";
         System.out.println(s.replaceAll("https://", ""));
 
