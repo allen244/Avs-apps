@@ -54,7 +54,7 @@ public class JsoupInlineLinks {
     public static void main(String[] args) {
 
 
-        //test
+        //test this
         String s = "https://www.nydailynews.com";
         System.out.println(s.replaceAll("https://", ""));
 
